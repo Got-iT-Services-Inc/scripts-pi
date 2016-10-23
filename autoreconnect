@@ -1,0 +1,37 @@
+#!/bin/bash
+# Auto reconnect script for chron
+# Richard Cintorino (c) 2016
+
+echo "Starting Autoreconnect..."
+
+Lock_File=/var/run/autoreconnect.pid
+Wlan_Iface="wlan0"
+
+echo "* Checking for other instances..."
+
+if [ -e $Lock_File ]; then
+   pid=`cat $Lock_File`
+   if kill -o &>1 > /dev/null $pid; then
+      echo "* - Existing instance detected... Goodbye!"
+      exit 1
+   else
+      rm $Lock_File
+   fi
+fi
+
+echo $$ > $Lock_File
+
+echo "* Checking interface $Wlan_Iface..."
+if ifconfig $Wlan_Iface | grep -q "inet " ; then
+   echo " * - We're still connected... Goodbye!"
+   exit 0
+else
+   echo "* - Network down! Reconnecting..."
+   ifdown $Wlan_Iface &> /dev/null
+   sleep 5
+   ifup $Wlan_Iface &> /dev/null
+fi
+rm $Lock_File
+exit 0
+
+

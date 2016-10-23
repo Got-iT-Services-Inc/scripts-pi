@@ -1,0 +1,2 @@
+#Run autoreconnect every 5 minutes
+*/5 * * * * /sbin/autoreconnect
